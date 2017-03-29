@@ -9,6 +9,7 @@
 #include <thread>
 #include <vector>
 #include <fstream>
+#include "timing.cpp"
 
 using namespace std;
 
@@ -56,9 +57,13 @@ void *integration (float xStart, float xEnd, float yStart, float yEnd, float ste
 
 
 int main(){
+    auto stage1_start_time = get_current_time_fenced();
+
     ifstream myfile;
     vector<string> words;
     string word;
+
+
     myfile.open("/home/natasha/CLionProjects/threads_project_2/read.txt");    //файл з усма конфігураціями
     if (!myfile.is_open()) {
         cerr << "Error" << endl;
@@ -68,13 +73,11 @@ int main(){
         string str3 = word.substr(pos+1);
         words.push_back(str3);
     }
-    for (int i = 0; i < words.size(); ++i) {     //прінт всіх
-        cout << words[i] << ' ';}
+
     int N = atoi( words[2].c_str() );//кількість потоків
 
     thread my_thread[N];
     long id;
-    //long starting = 0;
     long xS = atoi( words[3].c_str() );        //зчитувати з файлу   початки-кінці інтегрування
     long yS = atoi( words[5].c_str() );
     long xE = atoi( words[4].c_str() );
@@ -86,7 +89,6 @@ int main(){
     //потоки
     for(id = 0; id < N; id++){
         float xEnd = xS + stepX;        //кінець для локальної межі
-        //cout << stepX;
         float stepingX = stepX/1000;    //крок між і-тим та і-1-шим
         float yEnd = yS + stepY;
         float stepingY = stepY/1000;
@@ -95,8 +97,6 @@ int main(){
         }if(yEnd > yE){
             yEnd = yE;
         }
-       // cout << xEnd << xS << yEnd <<yS <<endl;
-        cout << stepingX<< stepingY<<endl;
         my_thread[id] =  thread(integration, xS, xEnd, yS, yEnd, stepingX, stepingY);
         xS += stepX + stepingX;     //наступний початок - це крок між межами для потоків + крок для локальних меж
         yS += stepY + stepingY;
@@ -104,7 +104,18 @@ int main(){
     for(id = 0; id < N; id++){
         my_thread[id].join();
     }
-    cout<< allS;
+    auto finish_time = get_current_time_fenced();
+    auto all_time = finish_time - stage1_start_time;
+    cout << "ALL time: " << to_us(all_time) << endl;
+
+    fstream log;
+    log.open("/home/natasha/CLionProjects/threads_project_2/result.txt", fstream::app);
+    std::chrono::duration<double, std::milli> all_ms = all_time;
+    log << "Result: " << allS<< " ";
+    log << all_ms.count();
+    log <<"\n";
+    log.close();
+    cout<< "Result : "<<allS;
 }
 
 
