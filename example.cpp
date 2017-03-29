@@ -7,6 +7,9 @@
 #include <assert.h>
 #include <mutex>
 #include <thread>
+#include <vector>
+#include <fstream>
+
 using namespace std;
 
 mutex mx;
@@ -27,7 +30,7 @@ float summing(float x1, float x2)
 
     generalS = -(firstS * secondS);
 
-    cout <<"x1  " <<x1<< ", x2  " << x2 << " , sum : " <<generalS<< endl;
+    //cout <<"x1  " <<x1<< ", x2  " << x2 << " , sum : " <<generalS<< endl;
     return generalS;
 }
 
@@ -53,14 +56,30 @@ void *integration (float xStart, float xEnd, float yStart, float yEnd, float ste
 
 
 int main(){
-    int N = 2;                  //кількість потоків
-    thread my_thread[N];        //замінити
+    ifstream myfile;
+    vector<string> words;
+    string word;
+    myfile.open("/home/natasha/CLionProjects/threads_project_2/read.txt");    //файл з усма конфігураціями
+    if (!myfile.is_open()) {
+        cerr << "Error" << endl;
+    }
+    while (myfile >> word) {        //додаємо рядок без =
+        size_t pos = word.find("=");
+        string str3 = word.substr(pos+1);
+        words.push_back(str3);
+    }
+    for (int i = 0; i < words.size(); ++i) {     //прінт всіх
+        cout << words[i] << ' ';}
+    int N = atoi( words[2].c_str() );//кількість потоків
+
+    thread my_thread[N];
     long id;
     //long starting = 0;
-    long xS = 0;        //зчитувати з файлу   початки-кінці інтегрування
-    long yS = 0;
-    long xE = 10;
-    long yE = 10;
+    long xS = atoi( words[3].c_str() );        //зчитувати з файлу   початки-кінці інтегрування
+    long yS = atoi( words[5].c_str() );
+    long xE = atoi( words[4].c_str() );
+    long yE = atoi( words[6].c_str() );
+    m = atoi( words[7].c_str() );
     float stepX = (xE - xS)/N;      //приблизна межа для кожного інтегралу
     float stepY = (yE - yS)/N;
 

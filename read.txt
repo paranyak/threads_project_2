@@ -1,0 +1,9 @@
+absolute=1
+relative=1
+threads=2
+xStart=0
+xEnd=10
+yStart=0
+yEnd=10
+m(?)=5
+extra=4
